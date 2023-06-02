@@ -6,6 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
+import * as o from '../../../../../output/output_ast';
 import {ElementAttributes} from '../element';
 import {OpKind} from '../enums';
 import {Op, OpList, XrefId} from '../operations';
@@ -17,9 +18,9 @@ import type {UpdateOp} from './update';
 /**
  * An operation usable on the creation side of the IR.
  */
-export type CreateOp =
-    ListEndOp<CreateOp>|StatementOp<CreateOp>|ElementOp|ElementStartOp|ElementEndOp|ContainerOp|
-    ContainerStartOp|ContainerEndOp|TemplateOp|TextOp|ListenerOp|PipeOp|VariableOp<CreateOp>;
+export type CreateOp = ListEndOp<CreateOp>|StatementOp<CreateOp>|ElementOp|ElementStartOp|
+    ElementEndOp|ContainerOp|ContainerStartOp|ContainerEndOp|TemplateOp|TextOp|ListenerOp|PipeOp|
+    VariableOp<CreateOp>|PropertyCreateOp;
 
 /**
  * Representation of a local reference on an element.
@@ -285,6 +286,42 @@ export function createPipeOp(xref: XrefId, name: string): PipeOp {
     name,
     ...NEW_OP,
     ...TRAIT_CONSUMES_SLOT,
+  };
+}
+
+/**
+ * TODO
+ */
+export interface PropertyCreateOp extends Op<CreateOp> {
+  kind: OpKind.PropertyCreate;
+
+  /**
+   * Reference to the element on which the property is bound.
+   */
+  target: XrefId;
+
+  /**
+   * Name of the bound property.
+   */
+  name: string;
+
+  /**
+   * Expression which is bound to the property.
+   */
+  expression: o.Expression;
+}
+
+/**
+ * Create a `PropertyCreateOp`.
+ */
+export function createPropertyCreateOp(
+    target: XrefId, name: string, expression: o.Expression): PropertyCreateOp {
+  return {
+    kind: OpKind.PropertyCreate,
+    target,
+    name,
+    expression,
+    ...NEW_OP,
   };
 }
 

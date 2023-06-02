@@ -20,8 +20,9 @@ import {BINARY_OPERATORS} from './conversion';
  * representation.
  */
 export function ingest(
-    componentName: string, template: t.Node[], constantPool: ConstantPool): ComponentCompilation {
-  const cpl = new ComponentCompilation(componentName, constantPool);
+    componentName: string, isSignal: boolean, template: t.Node[],
+    constantPool: ConstantPool): ComponentCompilation {
+  const cpl = new ComponentCompilation(componentName, isSignal, constantPool);
   ingestNodes(cpl.root, template);
   return cpl;
 }
@@ -267,7 +268,12 @@ function ingestPropertyBinding(
     view.update.push(ir.createInterpolatePropertyOp(
         xref, name, value.strings, value.expressions.map(expr => convertAst(expr, view.tpl))));
   } else {
-    view.update.push(ir.createPropertyOp(xref, name, convertAst(value, view.tpl)));
+    if (view.tpl.isSignal) {
+      console.error('Signal');
+      view.create.push(ir.createPropertyCreateOp(xref, name, convertAst(value, view.tpl)));
+    } else {
+      view.update.push(ir.createPropertyOp(xref, name, convertAst(value, view.tpl)));
+    }
   }
 }
 
